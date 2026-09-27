@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ajmal Free Live Keyword Finder</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#0b1020;color:#eef2ff}
+.wrap{max-width:1100px;margin:auto;padding:18px}
+.card{background:#121a30;border:1px solid #263454;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 10px 30px #0004}
+h1{margin:0 0 6px;font-size:25px}p{color:#aeb9d6}
+.grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+input,select,button{width:100%;padding:13px;border-radius:11px;border:1px solid #334366;background:#0d1427;color:#fff;font-size:15px}
+button{cursor:pointer;background:#2563eb;border-color:#2563eb;font-weight:700}
+button.alt{background:#17223d;border-color:#3b4d78}.platforms{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.platform{width:auto;padding:10px 16px}.platform.active{background:#16a34a;border-color:#16a34a}
+.status{padding:12px;border-radius:10px;background:#0c1529;color:#b9c7e8;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.stat{background:#0d1427;padding:14px;border-radius:12px}.stat b{display:block;font-size:22px;margin-top:5px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.toolbar select,.toolbar button{width:auto}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:720px}th,td{padding:11px;border-bottom:1px solid #263454;text-align:left}th{color:#9fb1d8;font-size:13px}
+.badge{padding:5px 8px;border-radius:999px;background:#243354;font-size:12px}.hot{background:#14532d}.medium{background:#713f12}
+.copy{padding:7px 10px;width:auto;background:#17223d;border-color:#3b4d78}
+.small{font-size:12px;color:#8493b5}.note{font-size:13px;line-height:1.5}
+@media(max-width:750px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:21px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="card">
+<h1>🚀 Free Live Keyword Finder</h1>
+<p>Google + YouTube live autocomplete research, with platform-specific keyword ideas for TikTok, Instagram and Facebook.</p>
+
+<div class="platforms">
+<button class="platform active" data-p="YouTube">▶ YouTube</button>
+<button class="platform" data-p="Google">🔎 Google</button>
+<button class="platform" data-p="TikTok">♪ TikTok</button>
+<button class="platform" data-p="Instagram">◎ Instagram</button>
+<button class="platform" data-p="Facebook">f Facebook</button>
+</div>
+
+<div class="grid">
+<input id="seed" value="islamic videos" placeholder="مثلاً: islamic videos">
+<select id="country">
+<option value="pk">Pakistan</option><option value="us">USA</option><option value="gb">UK</option><option value="ca">Canada</option><option value="au">Australia</option><option value="ae">UAE</option><option value="in">India</option>
+</select>
+<select id="lang">
+<option value="en">English</option><option value="ur">Urdu</option><option value="hi">Hindi</option><option value="ar">Arabic</option>
+</select>
+</div>
+<div class="toolbar">
+<button id="search">🔍 LIVE SEARCH KEYWORDS</button>
+<button class="alt" id="copyAll">📋 Copy All</button>
+<button class="alt" id="csv">⬇ Export CSV</button>
+</div>
+<div id="status" class="status">Ready. Enter a keyword and press LIVE SEARCH KEYWORDS.</div>
+</div>
+
+<div class="stats">
+<div class="stat">Keywords <b id="count">0</b></div>
+<div class="stat">High Opportunity <b id="high">0</b></div>
+<div class="stat">Questions <b id="questions">0</b></div>
+<div class="stat">Platform <b id="plat">YouTube</b></div>
+</div>
+
+<div class="card">
+<div class="toolbar">
+<select id="type"><option>All</option><option>Keywords</option><option>Questions</option><option>Long-tail</option><option>Hashtags</option></select>
+<select id="opp"><option>All opportunity</option><option>High</option><option>Medium</option></option></select>
+<input id="filter" style="max-width:260px" placeholder="Filter results...">
+</div>
+<div class="tablewrap">
+<table><thead><tr><th>#</th><th>Keyword</th><th>Signal</th><th>Opportunity</th><th>Type</th><th>Action</th></tr></thead>
+<tbody id="rows"></tbody></table>
+</div>
+</div>
+
+<div class="card note">
+<b>⚠ Important:</b> “High volume” cannot honestly be shown as an exact monthly number from free autocomplete alone. This tool therefore shows a <b>Signal</b> based on how often a phrase appears across live autocomplete expansions. For Google/YouTube, the suggestions are fetched live from Google's autocomplete service; YouTube uses its YouTube-specific suggestion dataset. For TikTok/Instagram/Facebook, there is no single public free native search-volume API, so the tool researches platform-focused phrases through Google autocomplete and clearly labels them as keyword ideas—not native platform volume.
+<br><br>
+For trend direction, validate important keywords in <b>Google Trends</b> and for exact Google volume use <b>Google Keyword Planner</b>.
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let platform="YouTube", results=[], busy=false, cbid=0;
+
+document.querySelectorAll(".platform").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".platform").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active"); platform=b.dataset.p; $("plat").textContent=platform;
+  $("status").textContent="Platform changed to "+platform+". Press LIVE SEARCH.";
+});
+
+function jsonp(url, timeout=7000){
+  return new Promise((resolve,reject)=>{
+    const cb="kwcb_"+Date.now()+"_"+(++cbid);
+    const s=document.createElement("script");
+    let done=false;
+    const timer=setTimeout(()=>{if(!done){done=true;cleanup();reject(new Error("Timeout"));}},timeout);
+    function cleanup(){clearTimeout(timer);delete window[cb];s.remove();}
+    window[cb]=data=>{if(done)return;done=true;cleanup();resolve(data)};
+    s.onerror=()=>{if(!done){done=true;cleanup();reject(new Error("Network error"))}};
+    s.src=url+(url.includes("?")?"&":"?")+"callback="+cb;
+    document.body.appendChild(s);
+  });
+}
+function esc(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+function queries(seed){
+  const q=[seed];
+  "abcdefghijklmnopqrstuvwxyz".split("").forEach(x=>q.push(seed+" "+x));
+  ["how","what","why","when","where","which","who","can","is","are","best","tips","ideas","tutorial","for","with","without","vs","2026"].forEach(x=>q.push(x+" "+seed));
+  return [...new Set(q)];
+}
+async function fetchSuggest(q){
+  const hl=$("lang").value, gl=$("country").value;
+  let base="https://suggestqueries.google.com/complete/search?client=chrome&hl="+encodeURIComponent(hl)+"&gl="+encodeURIComponent(gl)+"&q="+encodeURIComponent(q);
+  if(platform==="YouTube") base+="&ds=yt";
+  const data=await jsonp(base);
+  return Array.isArray(data)&&Array.isArray(data[1])?data[1]:[];
+}
+function localFallback(seed){
+  const mods=["how to","best","easy","latest","tips","tutorial","for beginners","shorts","viral","2026","ideas","explained"];
+  return [...new Set(mods.map(m=>m+" "+seed).concat(mods.map(m=>seed+" "+m)))];
+}
+async function search(){
+ if(busy)return; const seed=$("seed").value.trim(); if(!seed){$("status").textContent="Please enter a keyword.";return}
+ busy=true; results=[]; $("rows").innerHTML=""; $("status").textContent="⏳ Fetching LIVE autocomplete suggestions…";
+ const qs=queries(seed); const map=new Map(); let ok=0;
+ for(let i=0;i<qs.length;i++){
+   try{
+     let arr=await fetchSuggest(qs[i]); ok++;
+     arr.forEach(k=>{k=k.trim();if(k&&k.toLowerCase()!==seed.toLowerCase())map.set(k,(map.get(k)||0)+1)});
+   }catch(e){}
+   $("status").textContent="⏳ Searching "+(i+1)+"/"+qs.length+" queries… Found "+map.size;
+   await new Promise(r=>setTimeout(r,110));
+ }
+ if(!map.size){
+   const fb=localFallback(seed); fb.forEach(k=>map.set(k,1));
+   $("status").textContent="⚠ Live autocomplete did not respond in this browser. Showing fallback ideas. Try opening the file in Chrome and allow internet access.";
+ }else{
+   $("status").textContent="✅ Live search complete: "+map.size+" unique suggestions from "+ok+" live requests.";
+ }
+ results=[...map.entries()].map(([keyword,signal])=>{
+   let type=keyword.split(/\s+/).length>=4?"Long-tail":"Keywords";
+   if(/^(how|what|why|when|where|which|who|can|is|are)\b/i.test(keyword))type="Questions";
+   const score=Math.min(100,signal*18 + (keyword.split(/\s+/).length>=4?15:0) + (/best|tips|tutorial|how to|ideas|2026|viral/i.test(keyword)?12:0));
+   return {keyword,signal,score,type};
+ }).sort((a,b)=>b.score-a.score || b.signal-a.signal);
+ render(); busy=false;
+}
+function render(){
+ const ft=$("filter").value.toLowerCase(), ty=$("type").value, op=$("opp").value;
+ const arr=results.filter(r=>(!ft||r.keyword.toLowerCase().includes(ft))&&(ty==="All"||r.type===ty)&&(op==="All opportunity"||(op==="High"?r.score>=65:r.score>=40&&r.score<65)));
+ $("count").textContent=arr.length;
+ $("high").textContent=results.filter(r=>r.score>=65).length;
+ $("questions").textContent=results.filter(r=>r.type==="Questions").length;
+ $("rows").innerHTML=arr.map((r,i)=>{
+  const label=r.score>=65?"High":r.score>=40?"Medium":"Low";
+  return `<tr><td>${i+1}</td><td><b>${esc(r.keyword)}</b></td><td><span class="badge">${r.signal}×</span></td><td><span class="badge ${label==="High"?"hot":label==="Medium"?"medium":""}">${label} (${r.score})</span></td><td>${r.type}</td><td><button class="copy" onclick="copyOne(${JSON.stringify(r.keyword)})">Copy</button></td></tr>`
+ }).join("");
+}
+window.copyOne=async k=>{await navigator.clipboard.writeText(k);};
+$("search").onclick=search;$("filter").oninput=render;$("type").onchange=render;$("opp").onchange=render;
+$("copyAll").onclick=async()=>{await navigator.clipboard.writeText(results.map(x=>x.keyword).join("\n"));$("status").textContent="✅ All keywords copied."};
+$("csv").onclick=()=>{
+ let csv="Keyword,Signal,Opportunity Score,Type\n"+results.map(r=>`"${r.keyword.replace(/"/g,'""')}",${r.signal},${r.score},"${r.type}"`).join("\n");
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="keyword-research.csv";a.click();
+};
+$("seed").addEventListener("keydown",e=>{if(e.key==="Enter")search()});
+</script>
+</body>
+</html>
